@@ -20,6 +20,7 @@ larvae.df <- read_delim(list_of_results,
                         delim = ",",
                         id = "larva") %>%
   mutate(" " = NULL) %>%
+  filter(pH == 8) %>%
   mutate(larva = substr(larva, 1, nchar(larva) - 4)) %>% #drop file extension
   group_by(larva, sac) %>%
   mutate(psi = (row_number() * 30) - 30) %>% # x axis starting from zero
@@ -39,7 +40,7 @@ print(larvae.df)
 ggplot(data = larvae.df, 
        aes(x = psi,
            group = interaction(larva, sac),
-           colour = larva), na.rm = F) +
+           colour = larva)) +
   geom_point(aes(y= pct.pH6), size = 2, alpha = 1) +
   geom_line(aes(y= pct.pH6), alpha = 1) +
   geom_hline(yintercept = 0) #+
@@ -72,7 +73,7 @@ ggplot(data = larvae.df,
 ###############   looking at/ comparing individual larvae   ###############
 
 larva_choose <- larvae.df %>%
-  filter(larva == "larva 3" | larva == "larva 1")
+  filter(larva == "larva 3" | larva == "larva 8")
 print(larva_choose)
 
 # % change from pH 6
@@ -94,6 +95,7 @@ ggplot(data = larva_choose,
   geom_line(aes(y= Area))
 
 
+#####################      model?     ###################
 
 install.packages("ggformula")
 library(ggformula)
@@ -102,6 +104,32 @@ ggplot(larvae.df, aes(y = pct.pH6, x = psi)) +
   geom_point(size = 3, col = "firebrick") + 
   geom_spline(col = "black", df = 4) +
   theme_minimal()
+
+
+quad_mod <- lm(pct.pH6 ~ (psi + I(psi^2)) + type, larvae.df)
+
+anova(quad_mod)
+
+
+
+ggplot(data = larvae.df,
+       aes(x = psi,
+           y = pct.pH7,
+           shape = type,
+           linetype = type)) +
+  scale_shape_manual(values=c(1, 6)) +
+  geom_jitter(size = 3.5, width = 0.01) +
+  geom_smooth(method = "lm", 
+              formula = y ~ (x + I(x^2)),
+              color = '#555555') +
+  #geom_line(aes(x = pH, y = fit), show.legend = FALSE) +
+  #geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = 0.3, show.legend = FALSE) +
+  # annotate("rect",
+  #          xmin = sac$pH - sac$pH.sd,
+  #          xmax = sac$pH + sac$pH.sd,
+  #          ymin = -30, ymax = -25, fill = "black") +
+  theme_classic() +
+  theme(axis.ticks.length=unit(-0.1, "cm"))
 
 
 
