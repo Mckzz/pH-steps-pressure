@@ -6,7 +6,7 @@ library(readr)
 setwd("~/student_documents/UBC/Research/Malawi/data/sac pressure, pH series (6, 7, 8)\\pH8")
 
 
-#########       for multi sac images: make sac and type columns manually
+#########       for multi sac images: make sac and type columns manually   Add a column that is pH6_length
 larva_11 <- read_csv(
   "~/student_documents/UBC/Research/Malawi/data/sac pressure, pH series (6, 7, 8)\\pH8/larva 11, raw.csv") %>%
   rename(" " = ...1) %>% #so that the output can be fed into the larger data frame
